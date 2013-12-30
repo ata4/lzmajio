@@ -6,6 +6,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.ArrayBlockingQueue;
+import net.contrapunctus.lzma.ConcurrentBufferInputStream;
+import net.contrapunctus.lzma.ConcurrentBufferOutputStream;
+import net.contrapunctus.lzma.DecoderThread;
+import net.contrapunctus.lzma.EncoderThread;
+import net.contrapunctus.lzma.LzmaInputStream;
+import net.contrapunctus.lzma.LzmaOutputStream;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -17,19 +23,6 @@ import static org.junit.Assert.*;
  */
 public class ApiDriftTest
 {
-    /**
-     * Access the public API of the {@link Version} class.
-     */
-    @Test public void versionAPI()
-    {
-        int x = Version.major;
-        int y = Version.minor;
-        String s = Version.context;
-        Version.main(new String[0]);
-        Version.main(new String[1]);
-        Version v = new Version(); // pointless but brings line coverage to 100%
-    }
-
     /**
      * Access the public API of the {@link LzmaOutputStream} class.
      */

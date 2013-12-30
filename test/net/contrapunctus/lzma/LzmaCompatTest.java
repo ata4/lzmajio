@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.zip.CRC32;
 import java.util.zip.CheckedInputStream;
+import net.contrapunctus.lzma.LzmaInputStream;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized.Parameters;

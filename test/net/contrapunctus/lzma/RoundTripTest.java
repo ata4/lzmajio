@@ -10,6 +10,8 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import net.contrapunctus.lzma.LzmaInputStream;
+import net.contrapunctus.lzma.LzmaOutputStream;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;

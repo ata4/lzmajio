@@ -2,6 +2,8 @@ package net.contrapunctus.lzma;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import net.contrapunctus.lzma.DecoderThread;
+import net.contrapunctus.lzma.LzmaInputStream;
 import org.junit.Test;
 
 public class ExceptionTest
