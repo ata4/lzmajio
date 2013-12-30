@@ -8,110 +8,6 @@ import lzma.rangecoder.BitTreeDecoder;
 import lzma.rangecoder.RangeDecoder;
 
 public class LzmaDecoder {
-
-    class LenDecoder {
-
-        private short[] m_Choice = new short[2];
-        private BitTreeDecoder[] m_LowCoder = new BitTreeDecoder[LzmaState.kNumPosStatesMax];
-        private BitTreeDecoder[] m_MidCoder = new BitTreeDecoder[LzmaState.kNumPosStatesMax];
-        private BitTreeDecoder m_HighCoder = new BitTreeDecoder(LzmaState.kNumHighLenBits);
-        private int m_NumPosStates = 0;
-
-        public void create(int numPosStates) {
-            for (; m_NumPosStates < numPosStates; m_NumPosStates++) {
-                m_LowCoder[m_NumPosStates] = new BitTreeDecoder(LzmaState.kNumLowLenBits);
-                m_MidCoder[m_NumPosStates] = new BitTreeDecoder(LzmaState.kNumMidLenBits);
-            }
-        }
-
-        public void init() {
-            RangeDecoder.initBitModels(m_Choice);
-            for (int posState = 0; posState < m_NumPosStates; posState++) {
-                m_LowCoder[posState].init();
-                m_MidCoder[posState].init();
-            }
-            m_HighCoder.init();
-        }
-
-        public int decode(RangeDecoder rangeDecoder, int posState) throws IOException {
-            if (rangeDecoder.decodeBit(m_Choice, 0) == 0) {
-                return m_LowCoder[posState].decode(rangeDecoder);
-            }
-            int symbol = LzmaState.kNumLowLenSymbols;
-            if (rangeDecoder.decodeBit(m_Choice, 1) == 0) {
-                symbol += m_MidCoder[posState].decode(rangeDecoder);
-            } else {
-                symbol += LzmaState.kNumMidLenSymbols + m_HighCoder.decode(rangeDecoder);
-            }
-            return symbol;
-        }
-    }
-
-    class LiteralDecoder {
-
-        class Decoder2 {
-
-            private short[] m_Decoders = new short[0x300];
-
-            public void init() {
-                RangeDecoder.initBitModels(m_Decoders);
-            }
-
-            public byte decodeNormal(RangeDecoder rangeDecoder) throws IOException {
-                int symbol = 1;
-                do {
-                    symbol = (symbol << 1) | rangeDecoder.decodeBit(m_Decoders, symbol);
-                } while (symbol < 0x100);
-                return (byte) symbol;
-            }
-
-            public byte decodeWithMatchByte(RangeDecoder rangeDecoder, byte matchByte) throws IOException {
-                int symbol = 1;
-                do {
-                    int matchBit = (matchByte >> 7) & 1;
-                    matchByte <<= 1;
-                    int bit = rangeDecoder.decodeBit(m_Decoders, ((1 + matchBit) << 8) + symbol);
-                    symbol = (symbol << 1) | bit;
-                    if (matchBit != bit) {
-                        while (symbol < 0x100) {
-                            symbol = (symbol << 1) | rangeDecoder.decodeBit(m_Decoders, symbol);
-                        }
-                        break;
-                    }
-                } while (symbol < 0x100);
-                return (byte) symbol;
-            }
-        }
-        private Decoder2[] m_Coders;
-        private int m_NumPrevBits;
-        private int m_NumPosBits;
-        private int m_PosMask;
-
-        public void create(int numPosBits, int numPrevBits) {
-            if (m_Coders != null && m_NumPrevBits == numPrevBits && m_NumPosBits == numPosBits) {
-                return;
-            }
-            m_NumPosBits = numPosBits;
-            m_PosMask = (1 << numPosBits) - 1;
-            m_NumPrevBits = numPrevBits;
-            int numStates = 1 << (m_NumPrevBits + m_NumPosBits);
-            m_Coders = new Decoder2[numStates];
-            for (int i = 0; i < numStates; i++) {
-                m_Coders[i] = new Decoder2();
-            }
-        }
-
-        public void init() {
-            int numStates = 1 << (m_NumPrevBits + m_NumPosBits);
-            for (int i = 0; i < numStates; i++) {
-                m_Coders[i].init();
-            }
-        }
-
-        Decoder2 getDecoder(int pos, byte prevByte) {
-            return m_Coders[((pos & m_PosMask) << m_NumPrevBits) + ((prevByte & 0xFF) >>> (8 - m_NumPrevBits))];
-        }
-    }
     
     private OutWindow m_OutWindow = new OutWindow();
     private RangeDecoder m_RangeDecoder = new RangeDecoder();
@@ -197,7 +93,7 @@ public class LzmaDecoder {
         while (outSize < 0 || nowPos64 < outSize) {
             int posState = (int) nowPos64 & m_PosStateMask;
             if (m_RangeDecoder.decodeBit(m_IsMatchDecoders, (state << LzmaState.kNumPosStatesBitsMax) + posState) == 0) {
-                LiteralDecoder.Decoder2 decoder2 = m_LiteralDecoder.getDecoder((int) nowPos64, prevByte);
+                Decoder2 decoder2 = m_LiteralDecoder.getDecoder((int) nowPos64, prevByte);
                 if (!LzmaState.stateIsCharState(state)) {
                     prevByte = decoder2.decodeWithMatchByte(m_RangeDecoder, m_OutWindow.getByte(rep0));
                 } else {

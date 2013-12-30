@@ -1,4 +1,3 @@
-// Base.java
 package lzma;
 
 public class LzmaState {
@@ -71,4 +70,7 @@ public class LzmaState {
     public static final int kNumLenSymbols = kNumLowLenSymbols + kNumMidLenSymbols
             + (1 << kNumHighLenBits);
     public static final int kMatchMaxLen = kMatchMinLen + kNumLenSymbols - 1;
+
+    private LzmaState() {
+    }
 }
