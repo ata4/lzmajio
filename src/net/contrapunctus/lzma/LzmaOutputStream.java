@@ -6,75 +6,76 @@
 
 package net.contrapunctus.lzma;
 
-import java.io.ByteArrayOutputStream;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
-import SevenZip.Compression.LZMA.Encoder;
-import java.io.ByteArrayInputStream;
+public class LzmaOutputStream extends FilterOutputStream {
 
-public class LzmaOutputStream extends FilterOutputStream
-{
-    protected EncoderThread eth;
-
-    public static boolean LZMA_HEADER = true;
     /* true for compatibility with lzma(1) command-line tool, false
      * for compatibility with previous versions of LZMA streams.
      */
+    public static boolean LZMA_HEADER = true;
+    
+    private EncoderThread eth;
 
     private static final PrintStream dbg = System.err;
     private static final boolean DEBUG;
 
     static {
         String ds = null;
-        try { ds = System.getProperty("DEBUG_LzmaStreams"); }
-        catch(SecurityException e) { }
+        try {
+            ds = System.getProperty("DEBUG_LzmaStreams");
+        } catch (SecurityException e) {
+        }
         DEBUG = ds != null;
     }
 
-    public LzmaOutputStream( OutputStream _out ) 
-    {
+    public LzmaOutputStream(OutputStream _out) {
         this(_out, EncoderThread.DEFAULT_DICT_SZ_POW2, null);
     }
 
-    public LzmaOutputStream( OutputStream _out, Integer dictSzPow2, Integer fastBytes )
-    {
-        super( null );
-        eth = new EncoderThread( _out, dictSzPow2, fastBytes );
-        out = ConcurrentBufferOutputStream.create( eth.q );
-        if(DEBUG) dbg.printf("%s >> %s (%s)%n", this, out, eth.q);
-        eth.start( );
+    public LzmaOutputStream(OutputStream _out, Integer dictSzPow2, Integer fastBytes) {
+        super(null);
+        eth = new EncoderThread(_out, dictSzPow2, fastBytes);
+        out = ConcurrentBufferOutputStream.create(eth.q);
+        if (DEBUG) {
+            dbg.printf("%s >> %s (%s)%n", this, out, eth.q);
+        }
+        eth.start();
     }
 
-    public void write( int i ) throws IOException
-    {
-        if( eth.exn != null ) {
+    @Override
+    public void write(int i) throws IOException {
+        if (eth.exn != null) {
             throw eth.exn;
         }
-        out.write( i );
+        out.write(i);
     }
-        
-    public void close( ) throws IOException
-    {
-        if(DEBUG) dbg.printf("%s closed%n", this);
-        out.close( );
+
+    @Override
+    public void close() throws IOException {
+        if (DEBUG) {
+            dbg.printf("%s closed%n", this);
+        }
+        out.close();
         try {
-            eth.join( );
-            if(DEBUG) dbg.printf("%s joined %s%n", this, eth);
+            eth.join();
+            if (DEBUG) {
+                dbg.printf("%s joined %s%n", this, eth);
+            }
+        } catch (InterruptedException exn) {
+            throw new InterruptedIOException(exn.getMessage());
         }
-        catch( InterruptedException exn ) {
-            throw new InterruptedIOException( exn.getMessage() );
-        }
-        if( eth.exn != null ) {
+        if (eth.exn != null) {
             throw eth.exn;
         }
     }
 
-    public String toString( )
-    {
+    @Override
+    public String toString() {
         return String.format("lzmaOut@%x", hashCode());
     }
 }

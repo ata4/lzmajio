@@ -1,4 +1,4 @@
-// BenchMark.java -- 
+// Benchmark.java -- 
 // Copyright (c)2008 Christopher League <league@contrapunctus.net>
 
 // This is free software, but it comes with ABSOLUTELY NO WARRANTY.

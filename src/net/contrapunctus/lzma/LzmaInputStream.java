@@ -6,55 +6,61 @@
 
 package net.contrapunctus.lzma;
 
-import SevenZip.Compression.LZMA.Encoder;
-import SevenZip.Compression.LZMA.Decoder;
-import java.io.*;
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
 
-public class LzmaInputStream extends FilterInputStream
-{
-    protected DecoderThread dth;
+public class LzmaInputStream extends FilterInputStream {
 
+    private DecoderThread dth;
+    
     private static final PrintStream dbg = System.err;
     private static final boolean DEBUG;
 
     static {
         String ds = null;
-        try { ds = System.getProperty("DEBUG_LzmaStreams"); }
-        catch(SecurityException e) { }
+        try {
+            ds = System.getProperty("DEBUG_LzmaStreams");
+        } catch (SecurityException e) {
+        }
         DEBUG = ds != null;
     }
 
-    public LzmaInputStream( InputStream _in )
-    {
-        super( null );
-        dth = new DecoderThread( _in );
-        in = ConcurrentBufferInputStream.create( dth.q );
-        if(DEBUG) dbg.printf("%s << %s (%s)%n", this, in, dth.q);
-        dth.start( );
+    public LzmaInputStream(InputStream _in) {
+        super(null);
+        dth = new DecoderThread(_in);
+        in = ConcurrentBufferInputStream.create(dth.q);
+        if (DEBUG) {
+            dbg.printf("%s << %s (%s)%n", this, in, dth.q);
+        }
+        dth.start();
     }
 
-    public int read() throws IOException
-    {
+    @Override
+    public int read() throws IOException {
         int k = in.read();
         dth.maybeThrow();
         return k;
     }
 
-    public int read(byte[] b, int off, int len) throws IOException
-    {
+    @Override
+    public int read(byte[] b, int off, int len) throws IOException {
         int k = in.read(b, off, len);
         dth.maybeThrow();
         return k;
     }
 
-    public void close( ) throws IOException
-    {
-        if(DEBUG) dbg.printf("%s closed%n", this);
-        super.close( );
+    @Override
+    public void close() throws IOException {
+        if (DEBUG) {
+            dbg.printf("%s closed%n", this);
+        }
+        super.close();
     }
 
-    public String toString( )
-    {
+    @Override
+    public String toString() {
         return String.format("lzmaIn@%x", hashCode());
     }
 }
