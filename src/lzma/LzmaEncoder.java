@@ -1002,14 +1002,6 @@ public class LzmaEncoder {
         _alignPriceCount = 0;
     }
 
-    public boolean setAlgorithm(int algorithm) {
-        /*
-        _fastMode = (algorithm == 0);
-        _maxMode = (algorithm >= 2);
-         */
-        return true;
-    }
-
     public boolean setDictionarySize(int dictionarySize) {
         int kDicLogSizeMaxCompress = 29;
         if (dictionarySize < (1 << LzmaState.kDicLogSizeMin) || dictionarySize > (1 << kDicLogSizeMaxCompress)) {
