@@ -7,5 +7,8 @@
 /dist/
 /releases/
 
+# maven build directory
+/target/
+
 # other
 /private/
