@@ -589,7 +589,6 @@ public class LzmaEncoder {
                     startLen = lenTest + 1;
                 }
 
-                // if (_maxMode)
                 if (lenTest < numAvailableBytesFull) {
                     int t = Math.min(numAvailableBytesFull - 1 - lenTest, _numFastBytes);
                     int lenTest2 = _matchFinder.getMatchLen(lenTest, reps[repIndex], t);
@@ -862,7 +861,6 @@ public class LzmaEncoder {
             _additionalOffset -= len;
             nowPos64 += len;
             if (_additionalOffset == 0) {
-                // if (!_fastMode)
                 if (_matchPriceCount >= (1 << 7)) {
                     fillDistancesPrices();
                 }
@@ -912,11 +910,8 @@ public class LzmaEncoder {
         setOutStream(outStream);
         init();
 
-        // if (!_fastMode)
-        {
-            fillDistancesPrices();
-            fillAlignPrices();
-        }
+        fillDistancesPrices();
+        fillAlignPrices();
 
         _lenEncoder.setTableSize(_numFastBytes + 1 - LzmaState.kMatchMinLen);
         _lenEncoder.updateTables(1 << _posStateBits);
