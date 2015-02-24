@@ -24,12 +24,12 @@ public class LzmaCompatTest
     @Parameters public static Collection<Object[]> parameters()
         throws FileNotFoundException
     {
-        File dir = new File("tests/lzma-cmd");
+        System.out.println(new File("").getAbsoluteFile());
+        File dir = new File("src/test/resources/lzma-cmd");
         File[] fs = dir.listFiles();
         if(null == fs)
             {
-                throw new FileNotFoundException
-                    ("directory tests/lzma-cmd not found");
+                throw new FileNotFoundException(dir.toString());
             }
         Collection<Object[]> args = new ArrayList<Object[]>();
         for(File f : fs)

@@ -48,7 +48,7 @@ public class ApiDriftTest
     @Test public void entryPoints() throws IOException
     {
         RoundTripTest.main(new String[0]);
-        RoundTripTest.main(new String[] {"build.xml"});
+        RoundTripTest.main(new String[] {"pom.xml"});
     }
 
     @Test public void strings()

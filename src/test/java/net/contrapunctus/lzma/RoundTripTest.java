@@ -25,12 +25,11 @@ public class RoundTripTest
     @Parameters public static Collection<Object[]> files()
         throws FileNotFoundException
     {
-        File dir = new File("tests/roundtrip");
+        File dir = new File("src/test/resources/roundtrip");
         File[] fs = dir.listFiles();
         if(null == fs)
             {
-                throw new FileNotFoundException
-                    ("directory tests/roundtrip not found");
+                throw new FileNotFoundException(dir.toString());
             }
         Collection<Object[]> args = new ArrayList<Object[]>();
         for(File f : fs)
