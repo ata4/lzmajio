@@ -18,6 +18,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized.Parameters;
 import org.junit.runners.Parameterized;
 import static org.junit.Assert.*;
+import org.junit.Ignore;
 
 @RunWith(Parameterized.class)
 public class RoundTripTest
@@ -107,6 +108,7 @@ public class RoundTripTest
         Assert.assertTrue(Arrays.equals(original, expanded));
     }
 
+    @Ignore("Remove this line if unlzma is installed")
     @Test public void withLzmaCommand()
         throws IOException, InterruptedException
     {
