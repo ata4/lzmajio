@@ -35,22 +35,18 @@ public class RoundTripTest
         Collection<Object[]> args = new ArrayList<Object[]>();
         for(File f : fs)
             {
-                args.add(new Object[] { f, false });
-                args.add(new Object[] { f, true });
+                args.add(new Object[] { f });
             }
-        args.add(new Object[] { null, false });
-        args.add(new Object[] { null, true });
+        args.add(new Object[] { null });
         return args;
     }
 
     String name;
     byte[] original;
-    boolean header;
     boolean DEBUG;
 
-    public RoundTripTest(File file, boolean header) throws IOException
+    public RoundTripTest(File file) throws IOException
     {
-        this.header = header;
         if(file != null)
             {
                 this.name = file.getName();
@@ -77,13 +73,12 @@ public class RoundTripTest
 
     public String toString()
     {
-        return name + '[' + (header? '+':'-') + ']';
+        return name;
     }
 
     @Test public void run() throws IOException
     {
         System.out.printf("%s:", this);
-        LzmaOutputStream.LZMA_HEADER = header;
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         LzmaOutputStream los = new LzmaOutputStream( baos );
         los.write(original);
@@ -113,8 +108,6 @@ public class RoundTripTest
         throws IOException, InterruptedException
     {
         // header is required for compatibility with lzma(1)
-        if(!header) return;
-        LzmaOutputStream.LZMA_HEADER = header;
         System.out.printf("%s: ", this);
 
         // write compressed data to temp file
@@ -156,15 +149,13 @@ public class RoundTripTest
     {
         if(0 == args.length)
             {
-                new RoundTripTest(null, false).run();
-                new RoundTripTest(null, true).run();
+                new RoundTripTest(null).run();
             }
         else
             {
                 for(String s : args)
                     {
-                        new RoundTripTest(new File(s), false).run();
-                        new RoundTripTest(new File(s), true).run();
+                        new RoundTripTest(new File(s)).run();
                     }
             }
     }

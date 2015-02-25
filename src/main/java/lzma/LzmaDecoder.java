@@ -33,7 +33,7 @@ public class LzmaDecoder {
         }
     }
 
-    boolean setDictionarySize(int dictionarySize) {
+    public boolean setDictionarySize(int dictionarySize) {
         if (dictionarySize < 0) {
             return false;
         }
@@ -45,7 +45,7 @@ public class LzmaDecoder {
         return true;
     }
 
-    boolean setLcLpPb(int lc, int lp, int pb) {
+    public boolean setLcLpPb(int lc, int lp, int pb) {
         if (lc > LzmaState.kNumLitContextBitsMax || lp > 4 || pb > LzmaState.kNumPosStatesBitsMax) {
             return false;
         }
@@ -57,7 +57,7 @@ public class LzmaDecoder {
         return true;
     }
 
-    void init() throws IOException {
+    private void init() throws IOException {
         m_OutWindow.init(false);
 
         RangeDecoder.initBitModels(m_IsMatchDecoders);
@@ -172,24 +172,5 @@ public class LzmaDecoder {
         m_OutWindow.releaseStream();
         m_RangeDecoder.releaseStream();
         return true;
-    }
-
-    public boolean setDecoderProperties(byte[] properties) {
-        if (properties.length < 5) {
-            return false;
-        }
-        int val = properties[0] & 0xFF;
-        int lc = val % 9;
-        int remainder = val / 9;
-        int lp = remainder % 5;
-        int pb = remainder / 5;
-        int dictionarySize = 0;
-        for (int i = 0; i < 4; i++) {
-            dictionarySize += ((int) (properties[1 + i]) & 0xFF) << (i * 8);
-        }
-        if (!setLcLpPb(lc, lp, pb)) {
-            return false;
-        }
-        return setDictionarySize(dictionarySize);
     }
 }

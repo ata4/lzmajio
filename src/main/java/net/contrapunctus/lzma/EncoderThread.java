@@ -6,6 +6,7 @@
 
 package net.contrapunctus.lzma;
 
+import info.ata4.io.lzma.LzmaEncoderProps;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -15,13 +16,6 @@ import lzma.LzmaEncoder;
 
 class EncoderThread extends Thread {
 
-    public static final Integer DEFAULT_DICT_SZ_POW2 = new Integer(20);
-    
-    protected ArrayBlockingQueue<byte[]> q;
-    protected InputStream in;
-    protected OutputStream out;
-    protected LzmaEncoder enc;
-    protected IOException exn;
     private static final PrintStream dbg = System.err;
     private static final boolean DEBUG;
 
@@ -33,23 +27,21 @@ class EncoderThread extends Thread {
         }
         DEBUG = ds != null;
     }
+    
+    protected ArrayBlockingQueue<byte[]> q;
+    protected InputStream in;
+    protected OutputStream out;
+    protected LzmaEncoder enc;
+    protected LzmaEncoderProps props;
+    protected IOException exn;
 
-    /**
-     * @param dictSzPow2 If non-null, equivalent to the N in the -dN arg to
-     * LzmaAlone
-     * @param fastBytes If non-null, equivalent to the N in the -fbN arg to
-     * LzmaAlone
-     */
-    EncoderThread(OutputStream _out, Integer dictSzPow2, Integer fastBytes) {
+    EncoderThread(OutputStream _out, LzmaEncoderProps _props) {
         q = ConcurrentBufferOutputStream.newQueue();
         in = ConcurrentBufferInputStream.create(q);
         out = _out;
         enc = new LzmaEncoder();
         exn = null;
-        enc.setDictionarySize(1 << (dictSzPow2 == null ? DEFAULT_DICT_SZ_POW2 : dictSzPow2).intValue());
-        if (fastBytes != null) {
-            enc.setNumFastBytes(fastBytes.intValue());
-        }
+        props = _props;
         if (DEBUG) {
             dbg.printf("%s << %s (%s)%n", this, in, q);
         }
@@ -58,15 +50,8 @@ class EncoderThread extends Thread {
     @Override
     public void run() {
         try {
-            enc.setEndMarkerMode(true);
-            if (LzmaOutputStream.LZMA_HEADER) {
-                enc.writeCoderProperties(out);
-                // 5d 00 00 10 00
-                long fileSize = -1;
-                for (int i = 0; i < 8; i++) {
-                    out.write((int) (fileSize >>> (8 * i)) & 0xFF);
-                }
-            }
+            props.apply(enc);
+            props.toOutputStream(out);
             if (DEBUG) {
                 dbg.printf("%s begins%n", this);
             }
@@ -81,6 +66,10 @@ class EncoderThread extends Thread {
                 dbg.printf("%s exception: %s%n", exn.getMessage());
             }
         }
+    }
+    
+    public LzmaEncoderProps getProps() {
+        return props;
     }
 
     @Override

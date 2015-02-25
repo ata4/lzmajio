@@ -4,7 +4,7 @@
   <artifactId>lzmajio</artifactId>
   <packaging>jar</packaging>
   <name>lzmajio</name>
-  <version>ata4-0.96-SNAPSHOT</version>
+  <version>ata4-0.97-SNAPSHOT</version>
   <description>LZMA Streams in Java</description>
   <!-- Older URL: http://contrapunctus.net/league/haques/lzmajio/ -->
   <url>https://github.com/ata4/lzmajio</url>

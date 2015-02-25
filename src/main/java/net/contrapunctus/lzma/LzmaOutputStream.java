@@ -6,6 +6,7 @@
 
 package net.contrapunctus.lzma;
 
+import info.ata4.io.lzma.LzmaEncoderProps;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InterruptedIOException;
@@ -13,13 +14,6 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 
 public class LzmaOutputStream extends FilterOutputStream {
-
-    /* true for compatibility with lzma(1) command-line tool, false
-     * for compatibility with previous versions of LZMA streams.
-     */
-    public static boolean LZMA_HEADER = true;
-    
-    private EncoderThread eth;
 
     private static final PrintStream dbg = System.err;
     private static final boolean DEBUG;
@@ -32,14 +26,16 @@ public class LzmaOutputStream extends FilterOutputStream {
         }
         DEBUG = ds != null;
     }
+    
+    private EncoderThread eth;
 
     public LzmaOutputStream(OutputStream _out) {
-        this(_out, EncoderThread.DEFAULT_DICT_SZ_POW2, null);
+        this(_out, new LzmaEncoderProps());
     }
 
-    public LzmaOutputStream(OutputStream _out, Integer dictSzPow2, Integer fastBytes) {
+    public LzmaOutputStream(OutputStream _out, LzmaEncoderProps props) {
         super(null);
-        eth = new EncoderThread(_out, dictSzPow2, fastBytes);
+        eth = new EncoderThread(_out, props);
         out = ConcurrentBufferOutputStream.create(eth.q);
         if (DEBUG) {
             dbg.printf("%s >> %s (%s)%n", this, out, eth.q);

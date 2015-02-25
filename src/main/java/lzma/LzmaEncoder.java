@@ -736,10 +736,9 @@ public class LzmaEncoder {
         _rangeEncoder.flushStream();
     }
 
-    public void codeOneBlock(long[] inSize, long[] outSize, boolean[] finished) throws IOException {
-        inSize[0] = 0;
-        outSize[0] = 0;
-        finished[0] = true;
+    void codeOneBlock() throws IOException {
+        processedInSize = 0;
+        processedOutSize = 0;
 
         if (_inStream != null) {
             _matchFinder.setStream(_inStream);
@@ -867,8 +866,8 @@ public class LzmaEncoder {
                 if (_alignPriceCount >= LzmaState.kAlignTableSize) {
                     fillAlignPrices();
                 }
-                inSize[0] = nowPos64;
-                outSize[0] = _rangeEncoder.getProcessedSizeAdd();
+                processedInSize = nowPos64;
+                processedOutSize = _rangeEncoder.getProcessedSizeAdd();
                 if (_matchFinder.getNumAvailableBytes() == 0) {
                     flush((int) nowPos64);
                     return;
@@ -876,7 +875,6 @@ public class LzmaEncoder {
 
                 if (nowPos64 - progressPosValuePrev >= (1 << 12)) {
                     _finished = false;
-                    finished[0] = false;
                     return;
                 }
             }
@@ -920,40 +918,29 @@ public class LzmaEncoder {
 
         nowPos64 = 0;
     }
-    private long[] processedInSize = new long[1];
-    private long[] processedOutSize = new long[1];
-    private boolean[] finished = new boolean[1];
+    private long processedInSize;
+    private long processedOutSize;
 
     public void code(InputStream inStream, OutputStream outStream) throws IOException {
         _needReleaseMFStream = false;
         try {
             setStreams(inStream, outStream);
-            while (true) {
-                codeOneBlock(processedInSize, processedOutSize, finished);
-                if (finished[0]) {
-                    return;
-                }
+            while (!_finished) {
+                codeOneBlock();
             }
         } finally {
             releaseStreams();
         }
     }
     
-    public static final int kPropSize = 5;
+    public long getProcessedInSize() {
+        return processedInSize;
+    }
     
-    public byte[] getCoderProperties() {
-        byte[] properties = new byte[kPropSize];
-        properties[0] = (byte) ((_posStateBits * 5 + _numLiteralPosStateBits) * 9 + _numLiteralContextBits);
-        for (int i = 0; i < 4; i++) {
-            properties[1 + i] = (byte) (_dictionarySize >> (8 * i));
-        }
-        return properties;
+    public long getProcessedOutSize() {
+        return processedOutSize;
     }
-
-    public void writeCoderProperties(OutputStream outStream) throws IOException {
-        byte[] properties = getCoderProperties();
-        outStream.write(properties, 0, kPropSize);
-    }
+    
     private int[] tempPrices = new int[LzmaState.kNumFullDistances];
     private int _matchPriceCount;
 

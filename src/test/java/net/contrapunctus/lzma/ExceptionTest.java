@@ -22,6 +22,6 @@ public class ExceptionTest
 
     @Test(timeout = 5000, expected = IOException.class) public void truncatedLzma2() throws IOException
     {
-        readLzma(DecoderThread.props);
+        readLzma(new byte[] { 0x5d, 0x00, 0x00, 0x10, 0x00});
     }
 }

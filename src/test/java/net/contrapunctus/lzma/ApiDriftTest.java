@@ -1,5 +1,6 @@
 package net.contrapunctus.lzma;
 
+import info.ata4.io.lzma.LzmaEncoderProps;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -28,10 +29,13 @@ public class ApiDriftTest
      */
     @Test public void outstreamAPI()
     {
-        LzmaOutputStream.LZMA_HEADER = false;
         LzmaOutputStream los;
         los = new LzmaOutputStream(new ByteArrayOutputStream());
-        los = new LzmaOutputStream(new ByteArrayOutputStream(), 8, 2);
+        
+        LzmaEncoderProps props = new LzmaEncoderProps();
+        props.setDictionarySize(1 << 8);
+        props.setNumFastBytes(5);
+        los = new LzmaOutputStream(new ByteArrayOutputStream(), props);
         assertTrue(los instanceof OutputStream);
     }
 
@@ -65,7 +69,10 @@ public class ApiDriftTest
         Thread th = new DecoderThread(is);
         System.out.println(th);
         // EncoderThread
-        th = new EncoderThread(os, 0, 0);
+        LzmaEncoderProps props = new LzmaEncoderProps();
+        props.setDictionarySize(1 << 8);
+        props.setNumFastBytes(5);
+        th = new EncoderThread(os, props);
         System.out.println(th);
         // LzmaInputStream
         is = new LzmaInputStream(is);

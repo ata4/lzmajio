@@ -6,6 +6,7 @@
 
 package net.contrapunctus.lzma;
 
+import info.ata4.io.lzma.LzmaDecoderProps;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,11 +14,9 @@ import java.io.PrintStream;
 
 public class LzmaInputStream extends FilterInputStream {
 
-    private DecoderThread dth;
-    
     private static final PrintStream dbg = System.err;
     private static final boolean DEBUG;
-
+    
     static {
         String ds = null;
         try {
@@ -26,6 +25,8 @@ public class LzmaInputStream extends FilterInputStream {
         }
         DEBUG = ds != null;
     }
+    
+    private DecoderThread dth;
 
     public LzmaInputStream(InputStream _in) {
         super(null);
@@ -35,6 +36,10 @@ public class LzmaInputStream extends FilterInputStream {
             dbg.printf("%s << %s (%s)%n", this, in, dth.q);
         }
         dth.start();
+    }
+    
+    public LzmaDecoderProps getProperties() {
+        return dth.getProps();
     }
 
     @Override
