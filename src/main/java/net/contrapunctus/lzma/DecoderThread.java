@@ -52,7 +52,7 @@ class DecoderThread extends Thread {
             try {
                 props.fromInputStream(in);
             } catch (IllegalArgumentException ex) {
-                throw new IOException("Invalid LZMA properties");
+                throw new IOException("Invalid LZMA properties", ex);
             }
             props.apply(dec);
             if (DEBUG) {
