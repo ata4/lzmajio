@@ -10,6 +10,7 @@ import info.ata4.io.lzma.LzmaDecoderProps;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InterruptedIOException;
 import java.io.PrintStream;
 
 public class LzmaInputStream extends FilterInputStream {
@@ -62,6 +63,17 @@ public class LzmaInputStream extends FilterInputStream {
             dbg.printf("%s closed%n", this);
         }
         super.close();
+        try {
+            dth.join();
+            if (DEBUG) {
+                dbg.printf("%s joined %s%n", this, dth);
+            }
+        } catch (InterruptedException exn) {
+            throw new InterruptedIOException(exn.getMessage());
+        }
+        if (dth.exn != null) {
+            throw dth.exn;
+        }
     }
 
     @Override
