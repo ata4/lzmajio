@@ -23,6 +23,7 @@ public class LzmaProps {
     protected static final int kDicLogSizeMaxCompress = 29;
     
     private boolean includeProps = true;
+    private boolean includeSize = true;
     private int numLiteralContextBits = 3;
     private int numLiteralPosStateBits = 0;
     private int posStateBits = 2;
@@ -37,8 +38,23 @@ public class LzmaProps {
         this.includeProps = includeProps;
     }
     
+    public boolean isIncludeSize() {
+        return includeSize;
+    }
+    
+    public void setIncludeSize(boolean includeSize) {
+        this.includeSize = includeSize;
+    }
+    
     public int getPropSize() {
-        return isIncludeProps() ? 13 : 8;
+        int size = 0;
+        if (isIncludeSize()) {
+            size += 5;
+        }
+        if (isIncludeProps()) {
+            size += 8;
+        }
+        return size;
     }
     
     public int getNumLiteralContextBits() {
@@ -110,7 +126,9 @@ public class LzmaProps {
             setDictionarySize(propBuffer.getInt());
         }
         
-        setUncompressedSize(propBuffer.getLong());
+        if (isIncludeSize()) {
+            setUncompressedSize(propBuffer.getLong());
+        }
     }
     
     public void fromArray(byte[] properties) {
@@ -126,7 +144,10 @@ public class LzmaProps {
             propBuffer.putInt(getDictionarySize());
         }
         
-        propBuffer.putLong(getUncompressedSize());
+        if (isIncludeSize()) {
+            propBuffer.putLong(getUncompressedSize());
+        }
+        
         return propBuffer;
     }
     
