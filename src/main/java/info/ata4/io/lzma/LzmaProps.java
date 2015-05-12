@@ -49,10 +49,10 @@ public class LzmaProps {
     public int getPropSize() {
         int size = 0;
         if (isIncludeSize()) {
-            size += 5;
+            size += 8;
         }
         if (isIncludeProps()) {
-            size += 8;
+            size += 5;
         }
         return size;
     }
