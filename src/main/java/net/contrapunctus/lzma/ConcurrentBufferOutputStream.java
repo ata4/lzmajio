@@ -17,7 +17,7 @@ class ConcurrentBufferOutputStream extends OutputStream
 {
     protected ArrayBlockingQueue<byte[]> q;
     static final int BUFSIZE = 16384;
-    static final int QUEUESIZE = 4096;
+    static final int QUEUESIZE = 64;
     private static final PrintStream dbg = System.err;
     private static final boolean DEBUG;
 
