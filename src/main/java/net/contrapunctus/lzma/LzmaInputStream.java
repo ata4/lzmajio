@@ -62,15 +62,11 @@ public class LzmaInputStream extends FilterInputStream {
         if (DEBUG) {
             dbg.printf("%s closed%n", this);
         }
-        super.close();
-        try {
-            dth.join();
-            if (DEBUG) {
-                dbg.printf("%s joined %s%n", this, dth);
-            }
-        } catch (InterruptedException exn) {
-            throw new InterruptedIOException(exn.getMessage());
-        }
+        
+        in.close();
+        
+        dth.interrupt();
+        
         if (dth.exn != null) {
             throw dth.exn;
         }
